@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title></title>
+    <link href="Content/kendo/kendo.mobile.all.min.css" rel="stylesheet" type="text/css" />
+    <script src="Scripts/kendo/jquery.min.js" type="text/javascript"></script>
+    <script src="Scripts/kendo/kendo.mobile.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <!--This is the Flat ListView-->
+    <div data-role="view" id="flat" data-init="mobileProductDataBind" data-title="ListView" data-layout="databinding">
+        <ul id="flat-listview"></ul>
+    </div>
+
+    <!--This is the Grouped ListView-->
+    <div data-role="view" id="grouped" data-init="mobileProductGroupedDataBind" data-transition="" data-title="ListView" data-layout="databinding">
+         <ul id="grouped-listview"></ul>
+    </div>
+
+    <!--This is the application layout-->
+    <div data-role="layout" data-id="databinding">
+        <header data-role="header">
+            <div data-role="navbar">
+                <span data-role="view-title"></span>
+                <a data-align="right" data-role="button" class="nav-button" href="#index">Index</a>
+            </div>
+        </header>
+
+        <div data-role="footer">
+            <div data-role="tabstrip">
+                <a href="#flat" data-icon="stop">Flat</a>
+                <a href="#grouped" data-icon="organize">Grouped</a>
+            </div>
+        </div>
+    </div>
+
+    <!--This is the template for the Flat ListView-->
+    <script type="text/x-kendo-template" id="listviewHeadersTemplate">
+        <h3 class="item-title">#= Name #</h3>
+        <p class="item-info">#= kendo.format('{0:c}', Price) #</p>
+        <p>#= Category.CategoryName #</p>
+    </script>
+
+    <script>
+        // The base remote Url
+        var base_url = "http://localhost:55689";
+
+        // Create a reusable shared Transport object
+        var productTransport = new kendo.data.RemoteTransport({
+            read: {
+                url: base_url + "/api/product",
+                dataType: 'jsonp',              // jsonp is necessary here for cross domain calls, not just json
+                type: 'GET'
+            }
+        });
+
+        // Create a reusable shared DataSource object
+        var datasource = new kendo.data.DataSource({
+            transport: productTransport
+        });
+
+        // This function is data-bound to the flat listview
+        function mobileProductDataBind() {
+            $("#flat-listview").kendoMobileListView({
+                dataSource: datasource,
+                template: kendo.template($("#listviewHeadersTemplate").html())
+            });
+        }
+
+        // This function is data-bound to the grouped listview
+        function mobileProductGroupedDataBind() {
+            $("#grouped-listview").kendoMobileListView({
+                dataSource: kendo.data.DataSource.create({
+                    transport: productTransport, 
+                    group: { field: "Category.CategoryName"}
+                }),
+                template: "#= Name # - #= kendo.format('{0:c}', Price) #",
+                fixedHeaders: true
+            });
+        }
+    </script>
+
+    <script>
+        window.kendoMobileApplication = new kendo.mobile.Application(document.body);
+    </script>
+
+</body>
+</html>
